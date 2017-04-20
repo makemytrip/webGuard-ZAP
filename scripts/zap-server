@@ -1,0 +1,70 @@
+#!/bin/bash
+# chkconfig: 2345 20 80
+# description: ZAP Server Listener Program
+
+# Source function library.
+. /etc/init.d/functions
+
+HOME_DIR=/opt/zap-server
+
+APPNAME="ZAP Server"
+
+PYTHON=$HOME_DIR/env/bin/python
+SERVER=$HOME_DIR/scripts/server.py
+LOGFILE=$HOME_DIR/logs/server.log
+PIDFILE=/var/run/zap-server.pid
+LOCKFILE=/var/lock/subsys/zap-server
+
+start() {
+    touch $PIDFILE
+    PID=`cat $PIDFILE`
+    if [ "z$PID" != "z" ]; then
+	if [ -n "$(ps -o pid= -p $PID)" ]; then
+	    failure
+	    echo "$APPNAME is already running (PID: $PID)"
+	    exit 1
+	fi
+    fi
+    /usr/bin/nohup $PYTHON -u $SERVER >> $LOGFILE 2>> $LOGFILE &
+    RETVAL=$!
+    echo $RETVAL > $PIDFILE
+    touch $LOCKFILE
+    success
+    echo "Starting $APPNAME"
+}
+
+stop() {
+    touch $PIDFILE
+    PID=`cat $PIDFILE`
+    if [ "z$PID" != "z" ]; then
+        if [ -n "$(ps -o pid= -p $PID)" ]; then
+	    kill -9 $PID
+	    echo "" > $PIDFILE
+	    rm -f $LOCKFILE
+	    success
+	    echo "Stopping $APPNAME"
+	    exit 0
+        fi
+    fi
+    echo "" > $PIDFILE
+    rm -f $LOCKFILE
+    failure
+    echo "$APPNAME is not running"
+}
+
+case "$1" in 
+    start)
+       start
+       ;;
+    stop)
+       stop
+       ;;
+    restart)
+       stop
+       start
+       ;;
+    *)
+       echo "Usage: $0 {start|stop|restart}"
+esac
+
+exit 0 

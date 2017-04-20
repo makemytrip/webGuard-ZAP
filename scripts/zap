@@ -1,0 +1,30 @@
+#! /bin/bash
+#
+# zap       Register/De-register ZAP Server
+#
+# chkconfig: 2345 99 15
+# description: Register/De-register ZAP Server
+#              
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+PYTHON=/opt/zap-server/env/bin/python
+
+REGISTER_SCRIPT=/opt/zap-server/scripts/register.py
+UNREGISTER_SCRIPT=/opt/zap-server/scripts/unregister.py
+
+case "$1" in
+  start)
+	$PYTHON $REGISTER_SCRIPT
+	touch /var/lock/subsys/zap
+	;;
+  stop)
+	$PYTHON $UNREGISTER_SCRIPT
+	rm -fr /var/lock/subsys/zap
+	;;
+  *)
+        echo $"Usage: $0 {start|stop}"
+        exit 2
+esac
