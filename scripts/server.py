@@ -79,7 +79,7 @@ class EchoHandler(asyncore.dispatcher_with_send):
 		child = pexpect.spawn('unshare --mount')
 		child.sendline('mount %s/hosts/%s /etc/hosts --bind' % (HOME_DIR, api_key))
 		child.sendline('nohup %s/zap/zap.sh -daemon -port %s -host 0.0.0.0 -config api.key=%s >%s/logs/%s_%s.log 2>%s/logs/%s_%s_err.log &' % (HOME_DIR, port, api_key, HOME_DIR, port, api_key, HOME_DIR, port, api_key))
-		time.sleep(1)
+		time.sleep(3)
 		process = subprocess.Popen("ps -ef | grep zap | grep java | grep -v defunct | grep %s | grep -v grep" % (port), stdout=subprocess.PIPE, stderr=None, shell=True)
                 output = process.communicate()[0].strip()
 		output = output.split()
